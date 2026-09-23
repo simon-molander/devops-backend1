@@ -68,14 +68,22 @@ jobs:
 
     - name: Build with Maven
       run: mvn -B package
-
+      env:
+        SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:3306/bookingDb?createDatabaseIfNotExist=true
+        SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USERNAME }}
+        SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
 #    - name: Build with Maven
 #      run: mvn -B package -DiskTests
+    - name: Login to Dockerhub
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "hdvere" --password-stdin
+    - name: build image
+      run: |
+        docker build -t  hdvere/bookingservice:latest .
 
-      env:
-            SPRING_DATASOURCE_URL: jdbc:mariadb://localhost:3306/bookingDb?createDatabaseIfNotExist=true
-            SPRING_DATASOURCE_USERNAME: user
-            SPRING_DATASOURCE_PASSWORD: 123
+    - name: push to docker hub
+      run: |
+        docker push  hdvere/bookingservice:latest
+
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     #- name: Update dependency graph
     #  uses: advanced-security/maven-dependency-submission-action@571e99aab1055c2e71a1e2309b9691de18d6b7d6
